@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const VueLoader = require('vue-loader/lib/plugin')
+const VuetifyLoad = require('vuetify-loader/lib/plugin')
 const webpack = require('webpack')
 const friendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 
@@ -85,13 +86,30 @@ module.exports = {
           },
           {
             loader: 'sass-loader',
+            // Requires sass-loader@^7.0.0
+            // options: {
+            //   implementation: require('sass'),
+            //   fiber: require('fibers'),
+            //   indentedSyntax: true // optional
+            // },
+            // Requires sass-loader@^8.0.0
             options: {
-              implementation: require('dart-sass')
-            }
+              implementation: require('sass'),
+              sassOptions: {
+                fiber: require('fibers'),
+                // indentedSyntax: true // optional
+              },
+            },
           },
-          {
-            loader: 'postcss-loader'
-          }
+          // {
+          //   loader: 'sass-loader',
+          //   options: {
+          //     implementation: require('dart-sass')
+          //   }
+          // },
+          // {
+          //   loader: 'postcss-loader'
+          // }
         ]
       },
       {
@@ -150,6 +168,13 @@ module.exports = {
       filename: path.resolve(__dirname, '../dist/index.html')
     }),
     new VueLoader(),
+    new VuetifyLoad({
+      match (originalTag, { kebabTag, camelTag, path, component }) {
+        if (kebabTag.startsWith('core-')) {
+          return [camelTag, `import ${camelTag} from '@/components/core/${camelTag.substring(4)}.vue'`]
+        }
+      }
+    }),
     new webpack.NamedModulesPlugin(), // 辅助HotModuleReplacementPlugin插件
     new webpack.HotModuleReplacementPlugin(), // 启用热更新必须的
     new friendlyErrorsWebpackPlugin()
